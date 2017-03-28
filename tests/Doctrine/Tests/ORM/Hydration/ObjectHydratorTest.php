@@ -23,6 +23,10 @@ use Doctrine\Tests\Models\Forum\ForumBoard;
 use Doctrine\Tests\Models\Forum\ForumCategory;
 use Doctrine\Tests\Models\Hydration\EntityWithArrayDefaultArrayValueM2M;
 use Doctrine\Tests\Models\Hydration\SimpleEntity;
+use Doctrine\Tests\Models\InheritanceJoins\Start;
+use Doctrine\Tests\Models\InheritanceJoins\Base;
+use Doctrine\Tests\Models\InheritanceJoins\Child;
+use Doctrine\Tests\Models\InheritanceJoins\Join;
 
 class ObjectHydratorTest extends HydrationTestCase
 {
@@ -832,6 +836,45 @@ class ObjectHydratorTest extends HydrationTestCase
         $this->assertInstanceOf(PersistentCollection::class, $result[1][$userEntityKey]->articles[1]->comments);
         $this->assertEquals(0, count($result[1][$userEntityKey]->articles[1]->comments));
     }
+	
+	public function testInheritanceJoinAlias()
+	{
+		$rsm = new ResultSetMapping;
+		$rsm->addEntityResult(Start::class, 'a', 'base');
+		$rsm->addJoinedEntityResult(Base::class, 'b', 'a', 'bases');
+		$rsm->addEntityResult(Child::class, 'c');
+		$rsm->addJoinedEntityResult(Join::class, 'd', 'c', 'joins');
+		
+		$rsm->addFieldResult('a', 'id_0', 'id');
+		$rsm->addFieldResult('b', 'id_1', 'id');
+		$rsm->addFieldResult('c', 'id_2', 'id');
+		$rsm->addFieldResult('d', 'id_3', 'id');
+		
+		$rsm->addMetaResult('a', 'bases_id_4', 'bases_id', false, 'integer');
+		$rsm->addMetaResult('b', 'type_5', 'type');
+		$rsm->addMetaResult('c', 'type_6', 'type');
+		$rsm->addMetaResult('d', 'child_id_7', 'child_id', false, 'integer');
+		
+		$resultSet = [
+			[
+				'id_0' => '1',
+				'id_1' => '1',
+				'id_2' => '1',
+				'id_3' => '1',
+				'bases_id_4' => '1',
+				'type_5' => 'child',
+				'type_6' => 'child',
+				'child_id_7' => '1',
+			],
+		];
+		
+		$stmt     = new HydratorMockStatement($resultSet);
+        $hydrator = new \Doctrine\ORM\Internal\Hydration\ObjectHydrator($this->_em);
+        $result   = $hydrator->hydrateAll($stmt, $rsm, [Query::HINT_FORCE_PARTIAL_LOAD => true]);
+		
+		$this->assertInstanceOf(Child::class, $result[0]['base']);
+		$this->assertInstanceOf(Child::class, $result[1][0]);
+	}
 
     /**
      * Tests that the hydrator does not rely on a particular order of the rows
