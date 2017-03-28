@@ -875,7 +875,7 @@ class ObjectHydratorTest extends HydrationTestCase
         $hydrator = new \Doctrine\ORM\Internal\Hydration\ObjectHydrator($this->_em);
         $result   = $hydrator->hydrateAll($stmt, $rsm, [Query::HINT_FORCE_PARTIAL_LOAD => true]);
 		
-		$this->assertInstanceOf(Child::class, $result[0]['base']);
+		$this->assertInstanceOf(Start::class, $result[0]['base']);
 		$this->assertInstanceOf(Child::class, $result[1][0]);
 	}
 
