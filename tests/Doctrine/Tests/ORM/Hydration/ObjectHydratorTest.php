@@ -855,6 +855,9 @@ class ObjectHydratorTest extends HydrationTestCase
 		$rsm->addMetaResult('c', 'type_6', 'type');
 		$rsm->addMetaResult('d', 'child_id_7', 'child_id', false, 'integer');
 		
+		$rsm->setDiscriminatorColumn('b', 'type_5');
+		$rsm->setDiscriminatorColumn('c', 'type_6');
+		
 		$resultSet = [
 			[
 				'id_0' => '1',

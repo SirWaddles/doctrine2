@@ -18,7 +18,7 @@ abstract class Base
     protected $id;
 
     /**
-     * @OneToMany(targetEntity="DoctrineTestStart", mappedBy="bases")
+     * @OneToMany(targetEntity="Start", mappedBy="bases")
      */
     private $starts;
 }
